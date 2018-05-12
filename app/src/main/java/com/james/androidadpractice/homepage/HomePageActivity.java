@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.james.androidadpractice.R;
+import com.james.androidadpractice.client.InformationServiceClient;
 import com.james.androidadpractice.util.ActivityUtils;
 
 public class HomePageActivity extends AppCompatActivity {
@@ -25,6 +26,7 @@ public class HomePageActivity extends AppCompatActivity {
                     getSupportFragmentManager(), homePageFragment, R.id.contentFrame);
         }
 
-        HomePagePresenter homePagePresenter = new HomePagePresenter(homePageFragment);
+        InformationServiceClient informationServiceClient = new InformationServiceClient();
+        HomePagePresenter homePagePresenter = new HomePagePresenter(homePageFragment, informationServiceClient);
     }
 }

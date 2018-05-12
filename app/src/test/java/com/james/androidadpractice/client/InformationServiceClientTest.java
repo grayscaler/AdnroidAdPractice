@@ -12,7 +12,7 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.plugins.RxJavaPlugins;
 
-import static com.james.androidadpractice.Constants.QUERY_TYPE_NEWS;
+import static com.james.androidadpractice.Constants.CONTENT_TYPE_NEWS;
 import static org.junit.Assert.assertEquals;
 
 public class InformationServiceClientTest {
@@ -29,13 +29,13 @@ public class InformationServiceClientTest {
         final ContentResponse[] response = new ContentResponse[1];
         InformationServiceClient informationServiceClient = new InformationServiceClient();
 
-        informationServiceClient.rxGetContents(QUERY_TYPE_NEWS).subscribe(new Consumer<ContentResponse>() {
+        informationServiceClient.rxGetContents(CONTENT_TYPE_NEWS).subscribe(new Consumer<ContentResponse>() {
             @Override
             public void accept(ContentResponse contentResponse) throws Exception {
                 response[0] = contentResponse;
             }
         });
-        assertEquals(QUERY_TYPE_NEWS, response[0].getType());
+        assertEquals(CONTENT_TYPE_NEWS, response[0].getType());
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         System.out.println(gson.toJson(response[0]));
