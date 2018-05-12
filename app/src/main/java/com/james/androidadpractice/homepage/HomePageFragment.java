@@ -14,6 +14,13 @@ import android.view.ViewGroup;
 
 import com.james.androidadpractice.R;
 import com.james.androidadpractice.client.model.Content;
+import com.mopub.nativeads.MediaViewBinder;
+import com.mopub.nativeads.MoPubNativeAdPositioning;
+import com.mopub.nativeads.MoPubRecyclerAdapter;
+import com.mopub.nativeads.MoPubStaticNativeAdRenderer;
+import com.mopub.nativeads.MoPubVideoNativeAdRenderer;
+import com.mopub.nativeads.RequestParameters;
+import com.mopub.nativeads.ViewBinder;
 
 import java.util.List;
 
@@ -21,6 +28,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.james.androidadpractice.Constants.MOPUB_TEST_UNIT_ID;
 
 public class HomePageFragment extends Fragment implements HomePageContract.View {
 
@@ -32,6 +40,11 @@ public class HomePageFragment extends Fragment implements HomePageContract.View 
     private HomePageContract.Presenter mPresenter;
 
     private EndlessRecyclerOnScrollListener mEndlessRecyclerOnScrollListener;
+    private ContentAdapter mContentAdapter;
+
+    private MoPubRecyclerAdapter mRecyclerAdapter;
+    private MoPubSampleAdUnit mAdConfiguration;
+    private RequestParameters mRequestParameters;
 
     public static HomePageFragment newInstance() {
         return new HomePageFragment();
@@ -50,9 +63,51 @@ public class HomePageFragment extends Fragment implements HomePageContract.View 
 
         ButterKnife.bind(this, root);
 
+        initMopub();
+
         initView();
 
         return root;
+    }
+
+    private void initMopub() {
+//        mAdConfiguration = MoPubSampleAdUnit.fromBundle(getArguments());
+
+        mContentAdapter = new ContentAdapter();
+
+        MoPubNativeAdPositioning.MoPubClientPositioning adPositioning = MoPubNativeAdPositioning.clientPositioning();
+
+        adPositioning.addFixedPosition(5);
+        adPositioning.enableRepeatingPositions(5);
+
+        mRecyclerAdapter = new MoPubRecyclerAdapter(getActivity(), mContentAdapter, adPositioning);
+
+        MoPubStaticNativeAdRenderer moPubStaticNativeAdRenderer = new MoPubStaticNativeAdRenderer(
+                new ViewBinder.Builder(R.layout.native_ad_list_item)
+                        .titleId(R.id.native_title)
+                        .textId(R.id.native_text)
+                        .mainImageId(R.id.native_main_image)
+                        .iconImageId(R.id.native_icon_image)
+                        .callToActionId(R.id.native_cta)
+                        .privacyInformationIconImageId(R.id.native_privacy_information_icon_image)
+                        .build()
+        );
+
+        // Set up a renderer for a video native ad.
+        MoPubVideoNativeAdRenderer moPubVideoNativeAdRenderer = new MoPubVideoNativeAdRenderer(
+                new MediaViewBinder.Builder(R.layout.video_ad_list_item)
+                        .titleId(R.id.native_title)
+                        .textId(R.id.native_text)
+                        .mediaLayoutId(R.id.native_media_layout)
+                        .iconImageId(R.id.native_icon_image)
+                        .callToActionId(R.id.native_cta)
+                        .privacyInformationIconImageId(R.id.native_privacy_information_icon_image)
+                        .build());
+
+        mRecyclerAdapter.registerAdRenderer(moPubStaticNativeAdRenderer);
+        mRecyclerAdapter.registerAdRenderer(moPubVideoNativeAdRenderer);
+
+        mRecyclerAdapter.loadAds(MOPUB_TEST_UNIT_ID);
     }
 
     private void initView() {
@@ -68,13 +123,14 @@ public class HomePageFragment extends Fragment implements HomePageContract.View 
             public void onRefresh() {
                 mPresenter.clearCached();
                 mPresenter.loadData();
+                mRecyclerAdapter.refreshAds(MOPUB_TEST_UNIT_ID);
             }
         };
         mSwipeRefreshLayout.setOnRefreshListener(refreshListener);
     }
 
     private void initRecyclerView() {
-        mRecyclerView.setAdapter(new ContentAdapter());
+        mRecyclerView.setAdapter(mRecyclerAdapter);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -110,21 +166,21 @@ public class HomePageFragment extends Fragment implements HomePageContract.View 
 
     @Override
     public void setContentToAdapter(List<Content> contents) {
-        getAdapterFromRecyclerView().setContents(contents);
+        mContentAdapter.setContents(contents);
     }
 
     @Override
     public void addContentToAdapter(List<Content> contents) {
-        getAdapterFromRecyclerView().addContents(contents);
+        mContentAdapter.addContents(contents);
     }
 
-    private ContentAdapter getAdapterFromRecyclerView() {
-        return (ContentAdapter) mRecyclerView.getAdapter();
-    }
+//    private ContentAdapter getAdapterFromRecyclerView() {
+//        return (ContentAdapter) mRecyclerView.getAdapter();
+//    }
 
     @Override
     public void setAdapterLoading(boolean loading) {
-        getAdapterFromRecyclerView().showLoading(loading);
+        mContentAdapter.showLoading(loading);
     }
 
     @Override
@@ -135,5 +191,12 @@ public class HomePageFragment extends Fragment implements HomePageContract.View 
     @Override
     public void setSwipeRefreshLayoutRefreshing(boolean refreshing) {
         mSwipeRefreshLayout.setRefreshing(refreshing);
+    }
+
+    @Override
+    public void onDestroyView() {
+        // You must call this or the ad adapter may cause a memory leak.
+        mRecyclerAdapter.destroy();
+        super.onDestroyView();
     }
 }
