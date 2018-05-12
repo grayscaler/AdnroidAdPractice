@@ -37,6 +37,14 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
+    androidTestCompile('com.android.support.test.espresso:espresso-contrib:2.2') {
+        // Necessary to avoid version conflicts
+        exclude group: 'com.android.support', module: 'appcompat'
+        exclude group: 'com.android.support', module: 'support-v4'
+        exclude group: 'com.android.support', module: 'support-annotations'
+        exclude module: 'recyclerview-v7'
+    }
+
     compile "com.android.support:design:27.1.1"
     compile "com.google.guava:guava:18.0"
 
@@ -67,4 +75,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-base:11.4.0'
     implementation('com.mopub:libAvid-mopub:3.6.4')
     implementation 'com.moat.analytics.mobile.mpub:moat-mobile-app-kit:2.1.0'
+
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
+    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 }
