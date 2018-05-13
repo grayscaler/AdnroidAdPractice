@@ -77,8 +77,8 @@ public class HomePageFragment extends Fragment implements HomePageContract.View 
 
         MoPubNativeAdPositioning.MoPubClientPositioning adPositioning = MoPubNativeAdPositioning.clientPositioning();
 
-        adPositioning.addFixedPosition(5);
-        adPositioning.enableRepeatingPositions(5);
+        adPositioning.addFixedPosition(7);
+        adPositioning.enableRepeatingPositions(7);
 
         mRecyclerAdapter = new MoPubRecyclerAdapter(getActivity(), mContentAdapter, adPositioning);
 
@@ -107,7 +107,9 @@ public class HomePageFragment extends Fragment implements HomePageContract.View 
         mRecyclerAdapter.registerAdRenderer(moPubStaticNativeAdRenderer);
         mRecyclerAdapter.registerAdRenderer(moPubVideoNativeAdRenderer);
 
-        mRecyclerAdapter.loadAds(MOPUB_TEST_UNIT_ID);
+//        mRecyclerAdapter.setContentChangeStrategy(KEEP_ADS_FIXED);
+
+//        mRecyclerAdapter.loadAds(MOPUB_TEST_UNIT_ID);
     }
 
     private void initView() {
@@ -151,6 +153,14 @@ public class HomePageFragment extends Fragment implements HomePageContract.View 
                     // FIXME: 2018/4/2 timing issue
                     if (mPresenter != null) {
                         mPresenter.loadMoreData();
+                    }
+                }
+
+                @Override
+                public void onLoadAd(boolean isLoadAd) {
+                    Log.d(TAG, "onLoadAd: ");
+                    if (mRecyclerAdapter != null && isLoadAd) {
+                        mRecyclerAdapter.refreshAds(MOPUB_TEST_UNIT_ID);
                     }
                 }
             };
