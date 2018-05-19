@@ -14,12 +14,9 @@ import android.view.ViewGroup;
 
 import com.james.androidadpractice.R;
 import com.james.androidadpractice.client.model.Content;
-import com.mopub.nativeads.MediaViewBinder;
 import com.mopub.nativeads.MoPubNativeAdPositioning;
 import com.mopub.nativeads.MoPubRecyclerAdapter;
 import com.mopub.nativeads.MoPubStaticNativeAdRenderer;
-import com.mopub.nativeads.MoPubVideoNativeAdRenderer;
-import com.mopub.nativeads.RequestParameters;
 import com.mopub.nativeads.ViewBinder;
 
 import java.util.List;
@@ -28,6 +25,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.james.androidadpractice.Constants.AD_ITEM_REPEATING_POSITION;
+import static com.james.androidadpractice.Constants.AD_ITEM_START_POSITION;
 import static com.james.androidadpractice.Constants.MOPUB_TEST_UNIT_ID;
 
 public class HomePageFragment extends Fragment implements HomePageContract.View {
@@ -43,8 +42,6 @@ public class HomePageFragment extends Fragment implements HomePageContract.View 
     private ContentAdapter mContentAdapter;
 
     private MoPubRecyclerAdapter mRecyclerAdapter;
-    private MoPubSampleAdUnit mAdConfiguration;
-    private RequestParameters mRequestParameters;
 
     public static HomePageFragment newInstance() {
         return new HomePageFragment();
@@ -71,14 +68,12 @@ public class HomePageFragment extends Fragment implements HomePageContract.View 
     }
 
     private void initMopub() {
-//        mAdConfiguration = MoPubSampleAdUnit.fromBundle(getArguments());
-
         mContentAdapter = new ContentAdapter();
 
         MoPubNativeAdPositioning.MoPubClientPositioning adPositioning = MoPubNativeAdPositioning.clientPositioning();
 
-        adPositioning.addFixedPosition(7);
-        adPositioning.enableRepeatingPositions(7);
+        adPositioning.addFixedPosition(AD_ITEM_START_POSITION);
+        adPositioning.enableRepeatingPositions(AD_ITEM_REPEATING_POSITION);
 
         mRecyclerAdapter = new MoPubRecyclerAdapter(getActivity(), mContentAdapter, adPositioning);
 
@@ -93,23 +88,7 @@ public class HomePageFragment extends Fragment implements HomePageContract.View 
                         .build()
         );
 
-        // Set up a renderer for a video native ad.
-        MoPubVideoNativeAdRenderer moPubVideoNativeAdRenderer = new MoPubVideoNativeAdRenderer(
-                new MediaViewBinder.Builder(R.layout.video_ad_list_item)
-                        .titleId(R.id.native_title)
-                        .textId(R.id.native_text)
-                        .mediaLayoutId(R.id.native_media_layout)
-                        .iconImageId(R.id.native_icon_image)
-                        .callToActionId(R.id.native_cta)
-                        .privacyInformationIconImageId(R.id.native_privacy_information_icon_image)
-                        .build());
-
         mRecyclerAdapter.registerAdRenderer(moPubStaticNativeAdRenderer);
-        mRecyclerAdapter.registerAdRenderer(moPubVideoNativeAdRenderer);
-
-//        mRecyclerAdapter.setContentChangeStrategy(KEEP_ADS_FIXED);
-
-//        mRecyclerAdapter.loadAds(MOPUB_TEST_UNIT_ID);
     }
 
     private void initView() {
@@ -150,7 +129,6 @@ public class HomePageFragment extends Fragment implements HomePageContract.View 
                 @Override
                 public void onLoadMore(int currentPage) { // when we have reached end of RecyclerView this event fired
                     Log.d(TAG, "onLoadMore: ");
-                    // FIXME: 2018/4/2 timing issue
                     if (mPresenter != null) {
                         mPresenter.loadMoreData();
                     }
@@ -183,10 +161,6 @@ public class HomePageFragment extends Fragment implements HomePageContract.View 
     public void addContentToAdapter(List<Content> contents) {
         mContentAdapter.addContents(contents);
     }
-
-//    private ContentAdapter getAdapterFromRecyclerView() {
-//        return (ContentAdapter) mRecyclerView.getAdapter();
-//    }
 
     @Override
     public void setAdapterLoading(boolean loading) {

@@ -6,6 +6,9 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 
+import static com.james.androidadpractice.Constants.AD_ITEM_REPEATING_POSITION;
+import static com.james.androidadpractice.Constants.LOAD_AD_BUFFER;
+
 /**
  * from https://gist.github.com/ssinss/e06f12ef66c51252563e
  * https://gist.github.com/nesquena/8a976dd3d6f866518db2cfe7f9cb0db7
@@ -96,7 +99,7 @@ public abstract class EndlessRecyclerOnScrollListener extends RecyclerView.OnScr
             loading = true;
         }
 
-        if (((lastVisibleItemPosition + 2) % 7) == 0) {
+        if (((lastVisibleItemPosition + LOAD_AD_BUFFER) % AD_ITEM_REPEATING_POSITION) == 0) {
             onLoadAd(isLoadAd);
             isLoadAd = false;
         }
